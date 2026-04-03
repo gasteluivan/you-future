@@ -1,0 +1,10 @@
+node_modules
+dist
+.firebase
+firebase-debug.log
+firebase-debug.*.log
+.DS_Store
+functions/node_modules
+functions/.runtimeconfig.json
+*.local
+
