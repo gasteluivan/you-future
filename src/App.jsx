@@ -10,6 +10,8 @@ const copy = {
     name: 'Nombre',
     namePlaceholder: 'Tu nombre',
     profession: 'Profesion',
+    professionWrite: 'Escribe tu profesion',
+    professionWritePlaceholder: 'Ejemplo: Disenador de videojuegos',
     mode: 'Modo',
     currentMode: 'Profesional actual',
     futureMode: 'Version futura',
@@ -67,6 +69,8 @@ const copy = {
     name: 'Name',
     namePlaceholder: 'Your name',
     profession: 'Profession',
+    professionWrite: 'Write your profession',
+    professionWritePlaceholder: 'Example: Video game designer',
     mode: 'Mode',
     currentMode: 'Current professional',
     futureMode: 'Future version',
@@ -333,6 +337,7 @@ function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [name, setName] = useState('');
   const [professionId, setProfessionId] = useState('doctor');
+  const [customProfession, setCustomProfession] = useState('');
   const [generationMode, setGenerationMode] = useState('future');
   const [capturedPhoto, setCapturedPhoto] = useState('');
   const [generatedPhoto, setGeneratedPhoto] = useState('');
@@ -361,10 +366,34 @@ function App() {
       })),
     [language],
   );
-  const profession = useMemo(
+  const selectedProfession = useMemo(
     () => professionOptions.find((option) => option.id === professionId) || professionOptions[0],
     [professionId, professionOptions],
   );
+  const normalizedCustomProfession = customProfession.trim();
+  const profession = useMemo(() => {
+    if (normalizedCustomProfession) {
+      return {
+        kind: 'custom',
+        id: slugify(normalizedCustomProfession) || 'custom-profession',
+        label: normalizedCustomProfession,
+        labelEs: normalizedCustomProfession,
+        labelEn: normalizedCustomProfession,
+      };
+    }
+
+    if (!selectedProfession) {
+      return null;
+    }
+
+    return {
+      kind: 'preset',
+      id: selectedProfession.id,
+      label: selectedProfession.label,
+      labelEs: selectedProfession.labelEs,
+      labelEn: selectedProfession.labelEn,
+    };
+  }, [normalizedCustomProfession, selectedProfession]);
 
   useEffect(() => {
     analyticsPromise.catch(() => null);
@@ -548,13 +577,7 @@ function App() {
         name: name.trim(),
         language,
         generationMode,
-        profession: {
-          kind: 'preset',
-          id: profession.id,
-          label: profession.label,
-          labelEs: profession.labelEs,
-          labelEn: profession.labelEn,
-        },
+        profession,
         imageDataUrl: capturedPhoto,
       });
 
@@ -705,6 +728,17 @@ function App() {
                     </option>
                   ))}
                 </select>
+              </label>
+
+              <label className="field">
+                <span>{t.professionWrite}</span>
+                <input
+                  type="text"
+                  value={customProfession}
+                  onChange={(event) => setCustomProfession(event.target.value)}
+                  placeholder={t.professionWritePlaceholder}
+                  maxLength={90}
+                />
               </label>
 
               <div className="field">
